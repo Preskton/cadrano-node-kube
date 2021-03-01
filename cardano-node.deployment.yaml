@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cardano-node
+  labels:
+    app: cardano-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cardano-node
+  template:
+    metadata:
+      labels:
+        app: cardano-node
+    spec:
+      containers:
+      - name: cardano-node
+        image: inputoutput/cardano-node
+        ports:
+        - containerPort: 80
+        env:
+        - name: NETWORK
+          value: mainnet
+        volumeMounts:
+        - name: cardano-data
+          mountPath: /data
+        - name: cardano-ipc
+          mountPath: /ipc
+      volumes:
+      - name: cardano-data
+        persistentVolumeClaim:
+          claimName: cardano-data
+      - name: cardano-ipc
+        persistentVolumeClaim:
+          claimName: cardano-ipc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cardano-data
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # The amount of the volume's storage to request
+      storage: 40Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cardano-ipc
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # The amount of the volume's storage to request
+      storage: 40Gi
